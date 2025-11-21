@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Books Management</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 30px 20px;
+        }
+        .main-container { max-width: 1200px; margin: 0 auto; animation: fadeIn 0.6s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .header-card { background: white; border-radius: 20px; padding: 30px; margin-bottom: 30px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); }
+        .header-content { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
+        .page-title { display: flex; align-items: center; gap: 15px; }
+        .page-title i { font-size: 36px; color: #667eea; }
+        .page-title h1 { font-size: 32px; font-weight: 700; color: #333; margin: 0; }
+        .action-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn-modern {
+            padding: 12px 24px; border-radius: 10px; border: none; font-weight: 600; cursor: pointer;
+            transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px;
+            text-decoration: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;
+        }
+        .search-card { background: white; border-radius: 20px; padding: 20px 30px; margin-bottom: 30px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); }
+        .search-input {
+          border: 2px solid #e0e0e0; border-radius: 10px; padding: 12px 20px; width: 100%;
+          font-size: 15px; transition: all 0.3s ease;
+        }
+        .search-input:focus { border-color: #667eea; box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15); outline: none; }
+        .btn-modern:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4); color: white; text-decoration: none; }
+        .table-card { background: white; border-radius: 20px; padding: 30px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); overflow-x: auto; }
+        .table { margin-bottom: 0; }
+        .table thead th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;
+            font-weight: 600; text-transform: uppercase; font-size: 13px; letter-spacing: 0.5px; padding: 15px;
+        }
+        .table thead th:first-child { border-radius: 10px 0 0 0; }
+        .table thead th:last-child { border-radius: 0 10px 0 0; }
+        .table tbody tr { transition: all 0.3s ease; }
+        .table tbody tr:hover { background-color: #f8f9ff; transform: scale(1.01); }
+        .table tbody td { padding: 15px; vertical-align: middle; border-bottom: 1px solid #e0e0e0; }
+        .btn-sm { padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 600; border: none; transition: all 0.3s ease; color: white; }
+        .btn-sm:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); }
+        .btn-success, .btn-primary, .btn-danger, .btn-warning { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .btn-secondary { background: #6c757d; }
+        .status-available { color: #28a745; font-weight: 600; }
+        .status-borrowed { color: #dc3545; font-weight: 600; }
+        .borrower-name { color: #667eea; font-weight: 500; font-size: 12px; }
+        .modal-content { border-radius: 20px; border: none; overflow: hidden; }
+        .modal-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 20px 30px; }
+        .modal-title { font-weight: 600; font-size: 20px; }
+        .modal-body { padding: 30px; }
+        .modal-body label { font-weight: 600; color: #333; margin-bottom: 8px; display: block; }
+        .modal-body .form-control { border: 2px solid #e0e0e0; border-radius: 10px; padding: 12px 15px; transition: all 0.3s ease; }
+        .modal-body .form-control:focus { border-color: #667eea; box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15); }
+        .modal-footer { border: none; padding: 20px 30px; }
+        .close { color: white; opacity: 1; text-shadow: none; font-size: 28px; }
+        .close:hover { color: white; opacity: 0.8; }
+        .form-control.edit-title, .form-control.edit-author { border: 2px solid #667eea; background: #f8f9ff; }
+        .form-group { margin-bottom: 15px; }
+        @media (max-width: 768px) {
+            .header-content { flex-direction: column; align-items: flex-start; }
+            .action-buttons { width: 100%; }
+            .btn-modern { flex: 1; justify-content: center; }
+            .page-title h1 { font-size: 24px; }
+            .table-card { padding: 15px; }
+        }
+    </style>
+</head>
+<body>
+<div class="main-container">
+    <div class="header-card">
+        <div class="header-content">
+            <div class="page-title">
+                <i class="fas fa-book"></i>
+                <h1>All Books</h1>
+            </div>
+
+
+            <div class="action-buttons">
+                <button class="btn-modern" data-toggle="modal" data-target="#addBookModal">
+                    <i class="fas fa-plus"></i> Add New Book
+                </button>
+                <button class="btn-modern" data-toggle="modal" data-target="#returnBookModal">
+                    <i class="fas fa-undo"></i> Return Book
+                </button>
+                <a href="/admin/manage-users" class="btn-modern">
+                    <i class="fas fa-users"></i> Manage Users
+                </a>
+                <a href="/auth/logout" class="btn-modern">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-card">
+        <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search book by Title...">
+    </div>
+
+    <div class="table-card">
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Availability</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody id="book-table">
+            <tr th:each="book : ${books}">
+                <td th:text="${book.id}"></td>
+                <td>
+                    <span class="book-title" th:text="${book.title}"></span>
+                    <input class="form-control edit-title d-none" type="text" th:value="${book.title}">
+                </td>
+                <td>
+                    <span class="book-author" th:text="${book.author}"></span>
+                    <input class="form-control edit-author d-none" type="text" th:value="${book.author}">
+                </td>
+                <td>
+                    <span th:if="${book.available}" class="status-available">
+                        <i class="fas fa-check-circle"></i> Available
+                    </span>
+                    <span th:if="${!book.available}" class="status-borrowed">
+                        <i class="fas fa-times-circle"></i> Borrowed
+                        <br>
+                        <span th:if="${borrowerMap != null and borrowerMap[book.id] != null}" class="borrower-name">
+                            by: <span th:text="${borrowerMap[book.id]}"></span>
+                        </span>
+                    </span>
+                </td>
+                <td>
+                    <button class="btn btn-success btn-sm edit-btn">Edit</button>
+                    <button class="btn btn-primary btn-sm save-btn d-none" th:attr="data-id=${book.id}">Save</button>
+                    <a th:href="@{/books/delete/{id}(id=${book.id})}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Add Book Modal -->
+<div class="modal fade" id="addBookModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form th:action="@{/books/add}" th:object="${newBook}" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Book</h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Title:</label>
+                        <input type="text" th:field="*{title}" class="form-control" placeholder="Enter book title" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Author:</label>
+                        <input type="text" th:field="*{author}" class="form-control" placeholder="Enter author name" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Add Book</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Return Book Modal -->
+<div class="modal fade" id="returnBookModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form id="returnBookForm">
+                <div class="modal-header">
+                    <h5 class="modal-title">Return Book</h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Enter Book ID to return:</label>
+                        <input type="number" id="returnBookId" class="form-control" placeholder="Book ID" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Return Book</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+
+        // SEARCH FUNCTION
+        $("#searchInput").on("keyup", function () {
+          let value = $(this).val().toLowerCase();
+          $("#book-table tr").filter(function () {
+              $(this).toggle($(this).find(".book-title").text().toLowerCase().indexOf(value) > -1);
+          });
+        });
+        $(".edit-btn").click(function () {
+            let row = $(this).closest("tr");
+            row.find(".book-title, .book-author").addClass("d-none");
+            row.find(".edit-title, .edit-author").removeClass("d-none");
+            row.find(".edit-btn").addClass("d-none");
+            row.find(".save-btn").removeClass("d-none");
+        });
+
+        $(".save-btn").click(function () {
+            let row = $(this).closest("tr");
+            let id = $(this).data("id");
+            let title = row.find(".edit-title").val();
+            let author = row.find(".edit-author").val();
+
+            $.ajax({
+                url: '/books/edit',
+                method: 'POST',
+                data: { id: id, title: title, author: author },
+                success: function () {
+                    row.find(".book-title").text(title);
+                    row.find(".book-author").text(author);
+                    row.find(".book-title, .book-author").removeClass("d-none");
+                    row.find(".edit-title, .edit-author").addClass("d-none");
+                    row.find(".edit-btn").removeClass("d-none");
+                    row.find(".save-btn").addClass("d-none");
+                },
+                error: function(xhr) {
+                    alert("Error: " + xhr.responseText);
+                }
+            });
+        });
+
+        $("#returnBookForm").submit(function(e) {
+            e.preventDefault();
+            let bookId = $("#returnBookId").val();
+
+            $.ajax({
+                url: '/books/return',
+                method: 'POST',
+                data: { bookId: bookId },
+                success: function(response) {
+                    alert(response);
+                    $("#returnBookId").val('');
+                    $("#returnBookModal").modal('hide');
+                    location.reload();
+                },
+                error: function(xhr) {
+                    alert("Error: " + (xhr.responseText || "Could not return book"));
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>

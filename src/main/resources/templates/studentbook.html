@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Books - Student</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 30px 20px;
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .page-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .page-title i {
+            font-size: 36px;
+            color: #667eea;
+        }
+
+        .page-title h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #333;
+            margin: 0;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .search-card { background: white; border-radius: 20px; padding: 20px 30px; margin-bottom: 30px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); }
+        .search-input {
+          border: 2px solid #e0e0e0; border-radius: 10px; padding: 12px 20px; width: 100%;
+          font-size: 15px; transition: all 0.3s ease;
+        }
+        .search-input:focus { border-color: #667eea; box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15); outline: none; }
+
+        .btn-modern {
+            padding: 12px 24px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-modern:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+
+        .table-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            overflow-x: auto;
+        }
+
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table thead th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 13px;
+            letter-spacing: 0.5px;
+            padding: 15px;
+        }
+
+        .table thead th:first-child {
+            border-radius: 10px 0 0 0;
+        }
+
+        .table thead th:last-child {
+            border-radius: 0 10px 0 0;
+        }
+
+        .table tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f8f9ff;
+            transform: scale(1.01);
+        }
+
+        .table tbody td {
+            padding: 15px;
+            vertical-align: middle;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            border: none;
+            transition: all 0.3s ease;
+            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .btn-sm:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+
+        .status-available {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .status-unavailable {
+            color: #999;
+            font-weight: 600;
+        }
+
+        .borrowed-text {
+            color: #999;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .action-buttons {
+                width: 100%;
+            }
+
+            .btn-modern {
+                flex: 1;
+                justify-content: center;
+            }
+
+            .page-title h1 {
+                font-size: 24px;
+            }
+
+            .table-card {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="main-container">
+    <!-- Header Card -->
+    <div class="header-card">
+        <div class="header-content">
+            <div class="page-title">
+                <i class="fas fa-book-open"></i>
+                <h1>Available Books</h1>
+            </div>
+            <div class="action-buttons">
+                <a href="/auth/logout" class="btn-modern">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
+    </div>
+    <!-- Search Bar -->
+    <div class="search-card">
+        <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search book by Title...">
+    </div>
+
+    <!-- Books Table Card -->
+    <div class="table-card">
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Availability</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody id="studentBooktable">
+            <tr th:each="book : ${books}">
+                <td th:text="${book.id}"></td>
+                <td class="book-title" th:text="${book.title}" ></td>
+                <td th:text="${book.author}"></td>
+                <td>
+                    <span th:if="${book.available}" class="status-available">
+                        <i class="fas fa-check-circle"></i> Available
+                    </span>
+                    <span th:if="${!book.available}" class="status-unavailable">
+                        <i class="fas fa-times-circle"></i> Not Available
+                    </span>
+                </td>
+                <td>
+                    <button th:if="${book.available and borrowedByUser[book.id] != true and borrowedByOther[book.id] != true}"
+                            class="btn btn-primary btn-sm borrow-btn"
+                            th:data-id="${book.id}">
+                        <i class="fas fa-hand-holding"></i> Borrow
+                    </button>
+                    <span th:if="${borrowedByUser[book.id] == true}" class="borrowed-text">Already Borrowed by You</span>
+                    <span th:if="${borrowedByOther[book.id] == true}" class="borrowed-text">Already Borrowed</span>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+
+         // SEARCH FUNCTION
+        $("#searchInput").on("keyup", function () {
+          let value = $(this).val().toLowerCase();
+          $("#studentBooktable tr").filter(function () {
+              $(this).toggle($(this).find(".book-title").text().toLowerCase().indexOf(value) > -1);
+          });
+        });
+        $(".borrow-btn").click(function() {
+            let bookId = $(this).data("id");
+
+            $.post('/books/borrow', { bookId: bookId })
+                .done(function(response) {
+                    alert(response);
+                    location.reload();
+                })
+                .fail(function(xhr) {
+                    alert(xhr.responseText);
+                });
+        });
+    });
+</script>
+</body>
+</html>
